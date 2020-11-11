@@ -1,0 +1,356 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Level 1</title>
+    <script src="//cdn.jsdelivr.net/npm/phaser@3.22.0/dist/phaser.js"></script>
+    <link rel="stylesheet" href="css/platformer.css">
+</head>
+<body>
+<!-- Pause and Resume buttons-->
+<div class="pause" id="pause" onclick="pauseGame()"> Pause </div>
+<div class="resume" id="resume" onclick="resumeGame()"> Resume </div>
+<!-- Div to the welcome message to the level-->
+<div id="levelLoad" class="modal">
+    <!-- Modal content -->
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Welcome to Platformer 1</h2>
+        </div>
+        <div id="text3" class="modal-body">
+            The objective of this platformer is to use the platforms scattered throughout the level to reach the exit. <br>
+            You need to collect the Controller/Remote to open the door to the next level <br>
+            Falling off the platforms will cause a loss of a life. <br>
+            <br>
+            Controls: <br>
+            ↑ : Jump <br>
+            → : Move Right <br>
+            ← : Move Left <br>
+            <br>
+            Goal: Collect the Controller and Reach the Exit<br>
+            Lives Available: 3
+            <br>
+            <br>
+        </div>
+        <div class="modal-footer">
+            <button onclick="closeModal()">Start Level</button>
+            <button onclick="mainMenu()">Main Menu</button>
+        </div>
+    </div>
+</div>
+<!-- Div to the failed message to the level-->
+<div id="levelFailed" class="modal">
+    <!-- Modal content -->
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Level 1 Failed - Try Again!</h2>
+        </div>
+        <div id="text2" class="modal-body">
+            Level 1 failed. Better luck next time!
+        </div>
+        <div class="modal-footer">
+            <button onclick="playAgain()" id="close">Retry Level</button>
+            <button onclick="mainMenu()">Main Menu</button>
+        </div>
+    </div>
+</div>
+
+    <script>
+        //Define variables that will be used throughout the level
+        let playerLives = 3;
+        let deathDelay = 1500;
+        let fallingDeaths = 0;
+        //phaser 3 configure the level
+        let config = {
+            type: Phaser.AUTO,
+            width: 1550,
+            height: 950,
+            physics: {
+                default: 'arcade',
+                arcade: {
+                    gravity: {y: 400},
+                    debug: false
+                }
+            },
+            scene: {
+                preload: preload,
+                create: create,
+                update: update
+            },
+            autoCenter: Phaser.Scale.CENTER_BOTH
+        };
+
+        let game = new Phaser.Game(config);
+
+        // Define Variables to select certain elements within the HTML
+        let failed = document.getElementById("levelFailed");
+        let load = document.getElementById("levelLoad");
+        let pause = document.getElementById("pause");
+        let resume = document.getElementById("resume");
+
+       //On Window load Resize the game, load the welcome message and pause the game.
+        window.onload = function() {
+            resize();
+            window.addEventListener("resize", resize, false);
+            game.scene.pause("default", true);
+            load.classList.add("show");
+            load.style.display = "block";
+        };
+
+        //Preloading all of the assets and other resources used that are used throughout the level
+        function preload() {
+            this.load.image('forest', 'assets/forest.png');
+            this.load.image('platform1', 'assets/ForestPlatform1.png');
+            this.load.image('platform2', 'assets/ForestPlatform2.png');
+            this.load.image('platform3', 'assets/ForestPlatform3.png');
+            this.load.image('platform4', 'assets/ForestPlatform4.png');
+            this.load.image('platform5', 'assets/ForestPlatform5.png');
+            this.load.image('platform6', 'assets/ForestPlatform6.png');
+            this.load.image('platform7', 'assets/ForestPlatform7.png');
+            this.load.image('platform8', 'assets/ForestPlatform8.png');
+            this.load.image('outofbounds', 'assets/outofbounds.png');
+            this.load.image('door', 'assets/door.png');
+            this.load.image('controller', 'assets/controller.png');
+            this.load.image('key', 'assets/key.png');
+            this.load.spritesheet('dude', 'assets/dude.png', { frameWidth: 32, frameHeight: 48 });
+            this.load.audio('backgroundMusic', 'assets/sound/forestAmbience.mp3');
+            this.load.audio('playerJump', 'assets/sound/Platformer/Ejimas1.ogg', {
+                instances: 1
+            });
+            this.load.audio('playerDeath', 'assets/sound/Platformer/deathSound.mp3', {
+                instances: 1
+            });
+            this.load.audio('collect', 'assets/sound/Platformer/controllerCollect.mp3', {
+                instances: 1
+            });
+            this.load.audio('backgroundMusic', 'assets/sound/forestAmbience.mp3', {
+                loop: true
+            });
+            this.load.audio('exit', 'assets/sound/progressLevel.mp3', {
+                loop: true
+            });
+
+
+        }
+
+        //Create the level using the assets predefined within the preload function
+        function create() {
+            this.sound.play('backgroundMusic', {volume: 0.05, loop: true});
+            this.add.image(775, 475, 'forest');
+            platforms = this.physics.add.staticGroup();
+            platforms.create(185, 940, 'platform1');
+            platforms.create(180, 790, 'platform7');
+            platforms.create(310, 640, 'platform7');
+            platforms.create(190, 490, 'platform7');
+            platforms.create(190, 190, 'platform7');
+            platforms.create(400, 340, 'platform5');
+            platforms.create(625, 500, 'platform7');
+            platforms.create(700, 250, 'platform7');
+            platforms.create(825, 650, 'platform7');
+            platforms.create(760, 940, 'platform1');
+            platforms.create(925, 340, 'platform7');
+            platforms.create(1125, 490, 'platform7');
+            platforms.create(1350, 650, 'platform7');
+            platforms.create(1175, 250, 'platform6');
+            platforms.create(1450, 175, 'platform5');
+
+            outofbound = this.physics.add.staticGroup();
+            outofbound.create(775, 975, 'outofbounds');
+
+            //Text popup variables
+            this.respawnText = this.add.text(775,475, 'RESPAWNING', {fontSize: '64px', fill: '#ffffff'});
+            this.respawnText.setOrigin(0.5);
+            this.respawnText.visible = false;
+            pausedText = this.add.text(775,475, 'GAME PAUSED', {fontSize: '64px', fill: '#ffffff'});
+            pausedText.setOrigin(0.5);
+            pausedText.visible = false;
+
+            //Set the physics of the player, such as gravity, bounce and collision
+            player = this.physics.add.sprite(35, 750, 'dude');
+            this.physics.add.collider(player, platforms);
+            player.setBounce(0.2);
+            player.setCollideWorldBounds(true);
+            player.body.setGravityY(300);
+
+            exit = this.physics.add.staticGroup();
+            cursors = this.input.keyboard.createCursorKeys();
+            statusText = this.add.text(160, 10, 'Exit: Locked', {fontSize: '26px', fill: '#ffffff'});
+            livesText = this.add.text(380, 10, '|   Lives Remaining: 3', {fontSize: '26px', fill: '#ffffff'});
+
+            controllers = this.physics.add.group({
+                key: 'controller',
+                setXY: { x: 825, y: 0}
+            });
+
+            //Create the characters animations
+            this.anims.create({
+                key: 'left',
+                frames: this.anims.generateFrameNumbers('dude', { controller: 0, end: 3 }),
+                frameRate: 12,
+                repeat: -1
+
+            });
+
+            this.anims.create({
+                key: 'turn',
+                frames: [{ key: 'dude', frame: 4 }],
+                frameRate: 20
+            });
+
+            this.anims.create({
+                key: 'right',
+                frames: this.anims.generateFrameNumbers('dude', { controller: 5, end: 8 }),
+                frameRate: 10,
+                repeat: -1
+            });
+
+            this.physics.add.collider(controllers, platforms);
+            this.physics.add.overlap(player, controllers, collectcontroller, null, this);
+            this.physics.add.collider(exit, platforms);
+            this.physics.add.overlap(player, exit, exitStatus, null, this);
+            this.physics.add.collider(player, outofbound, OutOfBounds, null, this);
+        }
+
+        //Update function is a function which is in continuous effect to look for events
+        function update() {
+            if (cursors.left.isDown) {
+                player.setVelocityX(-160);
+                player.anims.play('left', true);
+            } else if (cursors.right.isDown) {
+                    player.setVelocityX(160);
+                    player.anims.play('right', true);
+            }
+            else {
+                player.setVelocityX(0);
+                player.anims.play('turn');
+            }
+
+            if (cursors.up.isDown && player.body.touching.down) {
+                player.setVelocityY(-500);
+                this.sound.play('playerJump');
+            }
+        }
+
+        //Function to control what will happen when the player interacts with the controller/remote
+        function collectcontroller(player, controller) {
+            this.sound.play('collect', {volume: 0.2});
+            controller.disableBody(true, true);
+            statusText.setText('Exit: Open');
+            exit.create(1525, 105, 'door')
+        }
+        //Function to control what will happen when the player reaches the exit
+        function exitStatus(player) {
+            this.sound.play('exit', {volume: 0.2});
+            player.disableBody(true, true);
+            this.time.addEvent({
+                delay: 800,
+                callbackScope: this,
+                callback: function () {
+                    window.location.replace("Puzzle1.html");
+                }
+            })
+        }
+        //Function to control what will happen when the player falls off the platform out of the map
+        function OutOfBounds(player) {
+            fallingDeaths = fallingDeaths + 1;
+            this.sound.play('playerDeath', {volume: 0.5});
+            if (playerLives <= 1) {
+                this.physics.pause();
+                livesText.setText("Lives Remaining: 0");
+                playerLives = 0;
+                player.setTint(0xff0000);
+                player.anims.play('turn');
+                failed.classList.add("show");
+                failed.style.display = "block";
+            } else if (playerLives === 2) {
+                this.physics.pause();
+                this.respawnText.visible = true;
+                this.time.addEvent({
+                    delay: deathDelay,
+                    callbackScope: this,
+                    callback: function () {
+                        this.physics.resume();
+                        this.respawnText.visible = false;
+                        livesText.setText("Lives Remaining: 1");
+                        player.body.gravity.y = 260;
+                        player.setPosition(380, 175);
+                        playerLives = 1;
+                    }
+                })
+            } else {
+                this.physics.pause();
+                this.respawnText.visible = true;
+                this.time.addEvent({
+                    delay: deathDelay,
+                    callbackScope: this,
+                    callback: function () {
+                        this.physics.resume();
+                        this.respawnText.visible = false;
+                        player.body.gravity.y = 280;
+                        player.setPosition(180, 550);
+                        livesText.setText("Lives Remaining: 2");
+                        playerLives = 2;
+                    }
+                })
+            }
+        }
+
+        //Function to pause the game
+        function pauseGame() {
+            pausedText.visible = true;
+            game.scene.pause("default", true);
+            pause.style.display = "none";
+            resume.style.display = "block";
+        }
+
+        //function to resume the game
+        function resumeGame() {
+            pausedText.visible = false;
+            game.scene.resume("default", true);
+            resume.style.display = "none";
+            pause.style.display = "block";
+        }
+
+        //Function so that the modal can be closed and the game can be played
+        function closeModal() {
+            let close = document.getElementById("levelLoad");
+            close.classList.add("hide");
+            close.style.display = "none";
+            game.scene.resume("default", true);
+        }
+
+        //Button function so that players can replay the level on success/failure
+        function playAgain() {
+            window.location.replace("Level1.html");
+            clearInterval(interval);
+        }
+
+        //Function to send the player back to main menu of button press
+        function mainMenu() {
+            window.location.replace("index.html");
+        }
+        //Function that looks for the size of the browser window and makes sure that the menu fits to the window.
+        function resize() {
+            let canvas = document.querySelector("canvas");
+            let windowWidth = window.innerWidth;
+            let windowHeight = window.innerHeight;
+            let windowRatio = windowWidth / windowHeight;
+            let gameRatio = game.config.width / game.config.height;
+
+            if(windowRatio < gameRatio){
+                canvas.style.width = windowWidth + "px";
+                canvas.style.height = (windowWidth / gameRatio) + "px";
+            }
+            else {
+                canvas.style.width = (windowHeight * gameRatio) + "px";
+                canvas.style.height = windowHeight + "px";
+            }
+        }
+
+
+    </script>
+
+</body>
+
+</html>

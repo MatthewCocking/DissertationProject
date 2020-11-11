@@ -1,0 +1,592 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Memory Game</title>
+    <link rel="stylesheet" href="css/pairs.css">
+</head>
+<body>
+
+<div class="reveal">
+    <div class="timer"></div>
+    <br>
+    <br>
+    <br>
+    <div class="moveCountText">
+        Move Count: 0
+    </div>
+    <br>
+    <br>
+    <div class="revealText">
+        Reveals Available: 0
+    </div>
+    <br>
+    <button class="revealButton" onclick="revealAll()"> Reveal Cards</button>
+</div>
+
+<!-- Div to the welcome message to the level-->
+<div id="levelLoad" class="modal">
+    <!-- Modal content -->
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Welcome to Puzzle 1</h2>
+        </div>
+        <div id="text3" class="modal-body">
+            The objective of this puzzle is to match the cards into pairs <br>
+            Clicking on a card will reveal an object behind the card, clicking on a card with the same object
+            consecutively will match the pair
+            <br>
+            <br>
+            <br>
+            Goal: Match all the Cards into pairs<br>
+            <br>
+        </div>
+        <div class="modal-footer">
+            <button onclick="closeModal()">Start Puzzle</button>
+            <button onclick="mainMenu()">Main Menu</button>
+        </div>
+    </div>
+</div>
+
+<!-- Div for the level complete popup  -->
+<div id="levelComplete" class="modal">
+    <!-- Modal content -->
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Level Complete - Congratulations!</h2>
+        </div>
+        <div id="text" class="modal-body">
+        </div>
+        <div class="modal-footer">
+            <button onclick="nextLevel()">Next Level</button>
+            <button onclick="playAgain()">Retry Level</button>
+            <button onclick="mainMenu()">Main Menu</button>
+        </div>
+    </div>
+</div>
+
+<!-- Div to the failed message to the level-->
+<div id="levelFailed" class="modal">
+    <!-- Modal content -->
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Level 2 Failed - Try Again!</h2>
+        </div>
+        <div id="text2" class="modal-body">
+            Level 2 failed. Better luck next time!
+        </div>
+        <div class="modal-footer">
+            <button onclick="playAgain()" id="close">Retry Level</button>
+            <button onclick="mainMenu()">Main Menu</button>
+        </div>
+    </div>
+</div>
+
+<section class="matching-game">
+    <div class="playingcards" data-object="Tree" id="Tree">
+        <img class="front" src="assets/woodencardTree.png" alt="Tree">
+        <img class="back" src="assets/woodencard.png" alt="Cardback">
+    </div>
+
+    <div class="playingcards" data-object="Tree" id="Tree2">
+        <img class="front" src="assets/woodencardTree.png" alt="Tree">
+        <img class="back" src="assets/woodencard.png" alt="Cardback">
+    </div>
+
+    <div class="playingcards" data-object="Apple" id="Apple">
+        <img class="front" src="assets/woodencardApple.png" alt="Apple">
+        <img class="back" src="assets/woodencard.png" alt="Cardback">
+    </div>
+
+    <div class="playingcards" data-object="Apple" id="Apple2">
+        <img class="front" src="assets/woodencardApple.png" alt="Apple">
+        <img class="back" src="assets/woodencard.png" alt="Cardback">
+    </div>
+
+    <div class="playingcards" data-object="Squirrel" id="Squirrel">
+        <img class="front" src="assets/woodencardSquirrel.png" alt="Squirrel">
+        <img class="back" src="assets/woodencard.png" alt="Cardback">
+    </div>
+
+    <div class="playingcards" data-object="Squirrel" id="Squirrel2">
+        <img class="front" src="assets/woodencardSquirrel.png" alt="Squirrel">
+        <img class="back" src="assets/woodencard.png" alt="Cardback">
+    </div>
+
+    <div class="playingcards" data-object="Ladybug" id="Ladybug">
+        <img class="front" src="assets/woodencardLadybug.png" alt="Ladybug">
+        <img class="back" src="assets/woodencard.png" alt="Cardback">
+    </div>
+
+    <div class="playingcards" data-object="Ladybug" id="Ladybug2">
+        <img class="front" src="assets/woodencardLadybug.png" alt="Ladybug">
+        <img class="back" src="assets/woodencard.png" alt="Cardback">
+    </div>
+
+    <div class="playingcards" data-object="Fox" id="Fox">
+        <img class="front" src="assets/woodencardFox.png" alt="Fox">
+        <img class="back" src="assets/woodencard.png" alt="Cardback">
+    </div>
+
+    <div class="playingcards" data-object="Fox" id="Fox2">
+        <img class="front" src="assets/woodencardFox.png" alt="Fox">
+        <img class="back" src="assets/woodencard.png" alt="Cardback">
+    </div>
+
+    <div class="playingcards" data-object="Bird" id="Bird">
+        <img class="front" src="assets/woodencardBird.png" alt="Bird">
+        <img class="back" src="assets/woodencard.png" alt="Cardback">
+    </div>
+
+    <div class="playingcards" data-object="Bird" id="Bird2">
+        <img class="front" src="assets/woodencardBird.png" alt="Bird">
+        <img class="back" src="assets/woodencard.png" alt="Cardback">
+    </div>
+
+    <div class="playingcards" data-object="Bear" id="Bear">
+        <img class="front" src="assets/woodencardBear.png" alt="Bear">
+        <img class="back" src="assets/woodencard.png" alt="Cardback">
+    </div>
+
+    <div class="playingcards" data-object="Bear" id="Bear2">
+        <img class="front" src="assets/woodencardBear.png" alt="Bear">
+        <img class="back" src="assets/woodencard.png" alt="Cardback">
+    </div>
+
+    <div class="playingcards" data-object="Butterfly" id="Butterfly">
+        <img class="front" src="assets/woodencardButterfly.png" alt="Butterfly">
+        <img class="back" src="assets/woodencard.png" alt="Cardback">
+    </div>
+
+    <div class="playingcards" data-object="Butterfly" id="Butterfly2">
+        <img class="front" src="assets/woodencardButterfly.png" alt="Butterfly">
+        <img class="back" src="assets/woodencard.png" alt="Cardback">
+    </div>
+
+    <div class="playingcards" data-object="Mushroom" id="Mushroom">
+        <img class="front" src="assets/woodencardMushroom.png" alt="Mushroom">
+        <img class="back" src="assets/woodencard.png" alt="Cardback">
+    </div>
+
+    <div class="playingcards" data-object="Mushroom" id="Mushroom2">
+        <img class="front" src="assets/woodencardMushroom.png" alt="Mushroom">
+        <img class="back" src="assets/woodencard.png" alt="Cardback">
+    </div>
+
+    <div class="playingcards" data-object="Flower" id="Flower">
+        <img class="front" src="assets/woodencardFlower.png" alt="Flower">
+        <img class="back" src="assets/woodencard.png" alt="Cardback">
+    </div>
+
+    <div class="playingcards" data-object="Flower" id="Flower2">
+        <img class="front" src="assets/woodencardFlower.png" alt="Flower">
+        <img class="back" src="assets/woodencard.png" alt="Cardback">
+    </div>
+
+
+</section>
+<script>
+    //Define all of the variables that will be used throughout the program
+    const playingcards = document.querySelectorAll('.playingcards');
+    playingcards.forEach(card => card.addEventListener('click', flipCard));
+    let hasFlippedCard = false;
+    let lockBoard = false;
+    let firstCard, secondCard;
+    let correctCards = 0;
+    let moveCount;
+    let moveCountText = document.querySelector(".moveCountText");
+
+    let birdCard = document.getElementById("Bird");
+    let birdCard2 = document.getElementById("Bird2");
+    let appleCard = document.getElementById("Apple");
+    let appleCard2 = document.getElementById("Apple2");
+    let squirrelCard = document.getElementById("Squirrel");
+    let squirrelCard2 = document.getElementById("Squirrel2");
+    let treeCard = document.getElementById("Tree");
+    let treeCard2 = document.getElementById("Tree2");
+    let ladybugCard = document.getElementById("Ladybug");
+    let ladybugCard2 = document.getElementById("Ladybug2");
+    let foxCard = document.getElementById("Fox");
+    let foxCard2 = document.getElementById("Fox2");
+    let bearCard = document.getElementById("Bear");
+    let bearCard2 = document.getElementById("Bear2");
+    let butterflyCard = document.getElementById("Butterfly");
+    let butterflyCard2 = document.getElementById("Butterfly2");
+    let flowerCard = document.getElementById("Flower");
+    let flowerCard2 = document.getElementById("Flower2");
+    let mushroomCard = document.getElementById("Mushroom");
+    let mushroomCard2 = document.getElementById("Mushroom2");
+
+    let congrats = document.getElementById("levelComplete");
+    let congratsText = document.getElementById("text");
+
+    let second = 0, minute = 0;
+    let timer = document.querySelector(".timer");
+    let interval;
+
+    let revealTime;
+    let availableReveals = 0;
+    let reveals = document.querySelector(".revealText");
+    let autoReveals = 0;
+
+    let cardFlipAudio = new Audio('assets/sound/Pairs/Card-flip-sound-effect.mp3');
+    let congratsAudio = new Audio('assets/sound/congratulations.mp3');
+    let backgroundMusic = new Audio('assets/sound/forestAmbience.mp3');
+
+    //Onload start the game
+    window.onload = startGame();
+    //Initiates a timer that increases by 1 second every second and at 60 seconds make the timer display in minutes
+    function startTimer() {
+        backgroundMusic.volume = 0.05;
+        backgroundMusic.loop = true;
+        backgroundMusic.play();
+        clearInterval(interval);
+        interval = setInterval(function () {
+            timer.innerHTML = minute + " mins " + second + " secs ";
+            second++;
+            if (second === 60) {
+                minute++;
+                second = 0;
+            }
+            checkPerformance();
+            flipRandom();
+        }, 1000);
+    }
+
+    // Checks the players performance and applied DDA if they are performing poorly
+    function checkPerformance() {
+        if (minute === 1 && second === 20 && correctCards < 4) {
+            autoReveals = 1;
+            reveals.innerHTML = "Reveals Available: " + availableReveals;
+        }
+        if (minute === 1 && second === 40 && correctCards < 6) {
+            autoReveals = 1;
+            reveals.innerHTML = "Reveals Available: " + availableReveals;
+        }
+        if (minute === 2 && second === 0 && correctCards < 8) {
+            autoReveals = 1;
+            reveals.innerHTML = "Reveals Available: " + availableReveals;
+        }
+        if (minute === 2 && second === 20 && correctCards < 10) {
+            autoReveals = 1;
+            reveals.innerHTML = "Reveals Available: " + availableReveals;
+        }
+        if (minute === 2 && second === 40 && correctCards < 12) {
+            autoReveals = 1;
+            reveals.innerHTML = "Reveals Available: " + availableReveals;
+        }
+    }
+
+    //DDA to flip a random card at specific breakpoints
+    function flipRandom() {
+        if (firstCard == null && autoReveals >= 1 && correctCards < 14) {
+            if (!(birdCard.classList.contains('flip'))) {
+                autoReveals = 0;
+                birdCard.classList.add('flip');
+                birdCard.removeEventListener('click', flipCard);
+                birdCard2.classList.add('flip');
+                birdCard2.removeEventListener('click', flipCard);
+                correctCards = correctCards + 2;
+                gameComplete()
+            } else if (!(appleCard.classList.contains('flip'))) {
+                autoReveals = 0;
+                appleCard.classList.add('flip');
+                appleCard.removeEventListener('click', flipCard);
+                appleCard2.classList.add('flip');
+                appleCard2.removeEventListener('click', flipCard);
+                correctCards = correctCards + 2;
+                gameComplete()
+            } else if (!(ladybugCard.classList.contains('flip'))) {
+                autoReveals = 0;
+                ladybugCard.classList.add('flip');
+                ladybugCard.removeEventListener('click', flipCard);
+                ladybugCard2.classList.add('flip');
+                ladybugCard2.removeEventListener('click', flipCard);
+                correctCards = correctCards + 2;
+                gameComplete()
+            } else if (!(foxCard.classList.contains('flip'))) {
+                autoReveals = 0;
+                foxCard.classList.add('flip');
+                foxCard.removeEventListener('click', flipCard);
+                foxCard2.classList.add('flip');
+                foxCard2.removeEventListener('click', flipCard);
+                correctCards = correctCards + 2;
+                gameComplete()
+            } else if (!(squirrelCard.classList.contains('flip'))) {
+                autoReveals = 0;
+                squirrelCard.classList.add('flip');
+                squirrelCard.removeEventListener('click', flipCard);
+                squirrelCard2.classList.add('flip');
+                squirrelCard2.removeEventListener('click', flipCard);
+                correctCards = correctCards + 2;
+                gameComplete()
+            } else if (!(bearCard.classList.contains('flip'))) {
+                autoReveals = 0;
+                bearCard.classList.add('flip');
+                bearCard.removeEventListener('click', flipCard);
+                bearCard2.classList.add('flip');
+                bearCard2.removeEventListener('click', flipCard);
+                correctCards = correctCards + 2;
+                gameComplete()
+            } else if (!(butterflyCard.classList.contains('flip'))) {
+                autoReveals = 0;
+                butterflyCard.classList.add('flip');
+                butterflyCard.removeEventListener('click', flipCard);
+                butterflyCard2.classList.add('flip');
+                butterflyCard2.removeEventListener('click', flipCard);
+                correctCards = correctCards + 2;
+                gameComplete()
+            } else if (!(flowerCard.classList.contains('flip'))) {
+                autoReveals = 0;
+                flowerCard.classList.add('flip');
+                flowerCard.removeEventListener('click', flipCard);
+                flowerCard2.classList.add('flip');
+                flowerCard2.removeEventListener('click', flipCard);
+                correctCards = correctCards + 2;
+                gameComplete()
+            } else if (!(mushroomCard.classList.contains('flip'))) {
+                autoReveals = 0;
+                mushroomCard.classList.add('flip');
+                mushroomCard.removeEventListener('click', flipCard);
+                mushroomCard2.classList.add('flip');
+                mushroomCard2.removeEventListener('click', flipCard);
+                correctCards = correctCards + 2;
+                gameComplete()
+            } else {
+                autoReveals = 0;
+                treeCard.classList.add('flip');
+                treeCard.removeEventListener('click', flipCard);
+                treeCard2.classList.add('flip');
+                treeCard2.removeEventListener('click', flipCard);
+                correctCards = correctCards + 2;
+                gameComplete()
+            }
+        }
+    }
+    //Functionality to start the game
+    function startGame() {
+        shuffle();
+        let welcome = document.getElementById("levelLoad");
+        moveCount = 0;
+        let timer = document.querySelector(".timer");
+        timer.innerHTML = "0 mins 0 secs";
+        clearInterval(interval);
+        welcome.classList.add("show");
+        timer.innerHTML = minute + " mins " + second + " secs";
+        welcome.style.display = "block";
+    }
+
+    //Functionality to flip a card
+    function flipCard() {
+        cardFlipAudio.volume = 0.3;
+        cardFlipAudio.play();
+        if (moveCount === 0) {
+            startTimer();
+        }
+
+        if (lockBoard) {
+            moveCount = moveCount + 1;
+            moveCountText.innerHTML = "Move Count: " + moveCount;
+            return;
+        }
+        if (this === firstCard) {
+            return;
+        }
+
+        this.classList.add('flip');
+        if (!hasFlippedCard) {
+            moveCount = moveCount + 1;
+            moveCountText.innerHTML = "Move Count: " + moveCount;
+            hasFlippedCard = true;
+            firstCard = this;
+            return;
+        }
+
+        //Apply DDA the DDA at specific breakpoints
+        if (moveCount === 15 || moveCount === 16) {
+            availableReveals = availableReveals + 1;
+            reveals.innerHTML = "Reveals Available: " + availableReveals;
+        }
+        if (moveCount === 30 || moveCount === 31) {
+            availableReveals = availableReveals + 1;
+            reveals.innerHTML = "Reveals Available: " + availableReveals;
+        }
+        if (moveCount === 45 || moveCount === 46) {
+            availableReveals = availableReveals + 1;
+            reveals.innerHTML = "Reveals Available: " + availableReveals;
+        }
+        if (moveCount === 60 || moveCount === 61) {
+            availableReveals = availableReveals + 1;
+            reveals.innerHTML = "Reveals Available: " + availableReveals;
+        }
+        moveCount = moveCount + 1;
+        moveCountText.innerHTML = "Move Count: " + moveCount;
+        secondCard = this;
+        secondCard = this;
+        lockBoard = true;
+        checkForMatch();
+    }
+
+    //Functionality to check whether the two selected cards are a pair
+    function checkForMatch() {
+        let Matched = firstCard.dataset.object === secondCard.dataset.object;
+        if (Matched) {
+            disableCards();
+            gameComplete();
+        } else {
+            unflipCards();
+        }
+    }
+
+    //functionality that reveals all the cards for a brief period of time
+    function revealAll() {
+        if (availableReveals > 0) {
+            cardFlipAudio.volume = 0.3;
+            cardFlipAudio.play();
+            availableReveals = availableReveals - 1;
+            treeCard.classList.add('revealed');
+            treeCard2.classList.add('revealed');
+            squirrelCard.classList.add('revealed');
+            squirrelCard2.classList.add('revealed');
+            foxCard.classList.add('revealed');
+            foxCard2.classList.add('revealed');
+            appleCard.classList.add('revealed');
+            appleCard2.classList.add('revealed');
+            birdCard.classList.add('revealed');
+            birdCard2.classList.add('revealed');
+            ladybugCard.classList.add('revealed');
+            ladybugCard2.classList.add('revealed');
+            bearCard.classList.add('revealed');
+            bearCard2.classList.add('revealed');
+            butterflyCard.classList.add('revealed');
+            butterflyCard2.classList.add('revealed');
+            flowerCard.classList.add('revealed');
+            flowerCard2.classList.add('revealed');
+            mushroomCard.classList.add('revealed');
+            mushroomCard2.classList.add('revealed');
+
+            revealTime = setTimeout(unrevealAll, 3000);
+            reveals.innerHTML = "Reveals Available: " + availableReveals;
+        }
+    }
+
+    //Functionality to rehide all the cards after using reveal
+    function unrevealAll() {
+        treeCard.classList.remove('revealed');
+        treeCard2.classList.remove('revealed');
+        squirrelCard.classList.remove('revealed');
+        squirrelCard2.classList.remove('revealed');
+        foxCard.classList.remove('revealed');
+        foxCard2.classList.remove('revealed');
+        appleCard.classList.remove('revealed');
+        appleCard2.classList.remove('revealed');
+        birdCard.classList.remove('revealed');
+        birdCard2.classList.remove('revealed');
+        ladybugCard.classList.remove('revealed');
+        ladybugCard2.classList.remove('revealed');
+        bearCard.classList.remove('revealed');
+        bearCard2.classList.remove('revealed');
+        butterflyCard.classList.remove('revealed');
+        butterflyCard2.classList.remove('revealed');
+        flowerCard.classList.remove('revealed');
+        flowerCard2.classList.remove('revealed');
+        mushroomCard.classList.remove('revealed');
+        mushroomCard2.classList.remove('revealed');
+        reveals.innerHTML = "Reveals Available: " + availableReveals;
+    }
+
+    //Functionality to check if the objective has been met and make the level complete popup appear with sound effects and pauses the timer.
+    function gameComplete() {
+        if (correctCards === 20) {
+            congratsAudio.volume = 0.5;
+            congratsAudio.play();
+            statistics();
+            clearInterval(interval);
+            congrats.classList.add("show");
+
+            timer.innerHTML = minute + " mins " + second + " secs ";
+            congrats.style.display = "block";
+
+        }
+    }
+
+    //Functionality to disable cards that can be called once a pair has been matched
+    function disableCards() {
+        firstCard.removeEventListener('click', flipCard);
+        secondCard.removeEventListener('click', flipCard);
+
+        correctCards = correctCards + 2;
+        resetBoard();
+    }
+
+    function unflipCards() {
+        setTimeout(() => {
+            firstCard.classList.remove('flip');
+            secondCard.classList.remove('flip');
+
+            resetBoard();
+        }, 1000);
+    }
+
+    function resetBoard() {
+        hasFlippedCard = false;
+        lockBoard = false;
+        firstCard = null;
+        secondCard = null;
+    }
+
+    function shuffle() {
+        playingcards.forEach(card => {
+            let randomize = Math.floor(Math.random() * 12);
+            card.style.order = randomize;
+        });
+    }
+    //Function so that the modal can be closed and the game can be played
+    function closeModal() {
+        let close = document.getElementById("levelLoad");
+        close.classList.add("hide");
+        close.style.display = "none";
+        game.scene.resume("default", true);
+    }
+
+    //Button function so that players can replay the level on success/failure
+    function playAgain() {
+        window.location.replace("Level1.html");
+        clearInterval(interval);
+    }
+
+    //Function to send the player back to main menu of button press
+    function mainMenu() {
+        window.location.replace("index.html");
+    }
+
+    function nextLevel() {
+        window.location.replace("Level2.html");
+    }
+
+    function statistics() {
+        congratsText.innerHTML = "Amount of cards flipped: " + moveCount + "<div>" + "Time Taken: " + minute + " Minutes " + second + " Seconds ";
+    }
+
+    //Function that looks for the size of the browser window and makes sure that the menu fits to the window.
+    function resize() {
+        var canvas = document.querySelector("window");
+        var windowWidth = window.innerWidth;
+        var windowHeight = window.innerHeight;
+        var windowRatio = windowWidth / windowHeight;
+        var gameRatio = game.config.width / game.config.height;
+        if (windowRatio < gameRatio) {
+            canvas.style.width = windowWidth + "px";
+            canvas.style.height = (windowWidth / gameRatio) + "px";
+        } else {
+            canvas.style.width = (windowHeight * gameRatio) + "px";
+            canvas.style.height = windowHeight + "px";
+        }
+    }
+
+
+</script>
+
+</body>
+
+</html>

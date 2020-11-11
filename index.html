@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="css/menu.css">
+</head>
+<body>
+<h1> PUZZLEFORMER </h1>
+<!-- Div to contains all of the initial buttons on the main menu-->
+<div class="mainButtons" id="mainButtons">
+    <button class="button" onclick="level1()"> Start Game</button>
+    <button class="button" onclick="levelSelect()"> Level Select</button>
+    <button class="button" onclick="options()"> Options</button>
+</div>
+<!-- Div to contain all of the level select buttons-->
+<div class="selectLevel" id="selectLevel">
+    <button class="button" onclick="level1()"> Level 1 - Forest</button>
+    <button class="button" onclick="level2()"> Level 2 - Space</button>
+    <button class="button" onclick="level3()"> Level 3 - Ocean</button>
+    <button class="button" onclick="puzzle1()"> Puzzle 1 - Match Pairs</button>
+    <button class="button" onclick="puzzle2()"> Puzzle 2 - Block-it</button>
+    <button class="button" onclick="puzzle3()"> Puzzle 3 - Breakout</button>
+    <button class="button" onclick="back()"> Back to Main Menu</button>
+</div>
+<!-- Div to contain all of the option buttons-->
+<div class="optionButtons" id="optionButtons">
+    <button class="button" onclick=""> Audio Settings</button>
+    <button class="button" onclick="back()"> Back to Main Menu</button>
+</div>
+<script>
+    // Define Variables to select certain elements within the HTML
+    let main = document.getElementById("mainButtons");
+    let select = document.getElementById("selectLevel");
+    let optionButtons = document.getElementById("optionButtons");
+
+    //Used to perform onload events such as making sure that the menu fits on the resolution of the browser and make the the menu buttons appear.
+    window.onload = function () {
+        resize();
+        window.addEventListener("resize", resize, false);
+        main.style.display = "block";
+    };
+
+    //Function to go to level 1
+    function level1() {
+        window.location.replace("Level1.html");
+    }
+
+    //Function to go to level 2
+    function level2() {
+        window.location.replace("Level2.html");
+    }
+
+    //Function to go to level 3
+    function level3() {
+        window.location.replace("Level3.html");
+    }
+
+    //Function to go to puzzle 1
+    function puzzle1() {
+        window.location.replace("Puzzle1.html");
+    }
+
+    //Function to go to puzzle 2
+    function puzzle2() {
+        window.location.replace("Puzzle2.html");
+    }
+
+    //Function to go to puzzle 3
+    function puzzle3() {
+        window.location.replace("Puzzle3.html");
+    }
+
+    //Function to return to the initial main menu
+    function back() {
+        select.classList.add("hide");
+        select.style.display = "none";
+        optionButtons.classList.add("hide");
+        optionButtons.style.display = "none";
+        main.classList.add("show");
+        main.style.display = "block";
+    }
+
+    //Function to go to the level select section of main menu
+    function levelSelect() {
+        select.classList.add("show");
+        select.style.display = "block";
+        optionButtons.classList.add("hide");
+        optionButtons.style.display = "none";
+        main.classList.add("hide");
+        main.style.display = "none";
+    }
+
+    //Function to go to the options section of main menu
+    function options() {
+        optionButtons.classList.add("show");
+        optionButtons.style.display = "block";
+        select.classList.add("hide");
+        select.style.display = "none";
+        main.classList.add("hide");
+        main.style.display = "none";
+    }
+
+    //Function that looks for the size of the browser window and makes sure that the menu fits to the window.
+    function resize() {
+        var canvas = document.querySelector("body");
+        var windowWidth = window.innerWidth;
+        var windowHeight = window.innerHeight;
+        var windowRatio = window.width / window.height;
+
+        if (windowRatio < windowRatio) {
+            canvas.style.width = windowWidth + "px";
+            canvas.style.height = (windowWidth / windowRatio) + "px";
+        } else {
+            canvas.style.width = (windowHeight * windowRatio) + "px";
+            canvas.style.height = windowHeight + "px";
+        }
+    }
+
+</script>
+</body>
+</html>

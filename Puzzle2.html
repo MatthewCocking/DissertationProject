@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Block-it</title>
+    <link rel="stylesheet" href="css/blockit.css">
+    <script src="//cdn.jsdelivr.net/npm/phaser@3.22.0/dist/phaser.js"></script>
+</head>
+<body>
+<!-- div for timer -->
+<div>
+    <div class="timer"></div>
+    <br><br>
+    <div id="livesText" class="livesText"> Available Lives: 3</div>
+</div>
+
+<!-- Div to the welcome message to the level-->
+<div id="levelLoad" class="modal">
+    <!-- Modal content -->
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Welcome to Puzzle 2</h2>
+        </div>
+        <div id="text3" class="modal-body">
+            The objective of this puzzle is to keep the Moon within the square. <br>
+            The left wall and the right wall are player controlled and upon clicking the screen both walls will activate
+            <br>
+            Simply click just before the ball hits one of the walls however beware it gets more difficult the longer you
+            play.
+            <br>
+            <br>
+            Goal: Survive 35 Seconds<br>
+            Attempts Available: 3
+            <br>
+            <br>
+        </div>
+        <div class="modal-footer">
+            <button onclick="closeModal()">Start Puzzle</button>
+            <button onclick="mainMenu()">Main Menu</button>
+        </div>
+    </div>
+</div>
+
+<!-- Div for the level complete popup-->
+<div id="levelComplete" class="modal">
+    <!-- Modal content -->
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Level 2 Complete - Congratulations!</h2>
+        </div>
+        <div id="text" class="modal-body">
+        </div>
+        <div class="modal-footer">
+            <button onclick="nextLevel()">Next Level</button>
+            <button onclick="playAgain()">Retry Level</button>
+            <button onclick="mainMenu()">Main Menu</button>
+        </div>
+    </div>
+</div>
+
+<!-- Div to the failed message to the level-->
+<div id="levelFailed" class="modal">
+    <!-- Modal content -->
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Level 2 Failed - Try Again!</h2>
+        </div>
+        <div id="text2" class="modal-body">
+            Level 2 failed. Better luck next time!
+        </div>
+        <div class="modal-footer">
+            <button onclick="playAgain()" id="close">Retry Level</button>
+            <button onclick="mainMenu()">Main Menu</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    //https://www.emanueleferonato.com/2018/12/20/build-a-html5-game-like-block-it-using-phaser-3-and-arcade-physics-in-less-than-100-lines-of-code/
+    //Code from the puzzle was initially taken from here however has been updated and edited to work with the project and
+    //follow the same coding standards used throughout the rest of the project.
+
+    //phaser 3 configure the level
+    let config = {
+        type: Phaser.AUTO,
+        width: 800,
+        height: 650,
+        transparent: true,
+        physics: {
+            default: 'arcade',
+        },
+        scene: {
+            preload: preload,
+            create: create,
+            update: update
+        },
+        autoCenter: Phaser.Scale.CENTER_BOTH,
+    };
+
+    let second = 0;
+    let timer = document.querySelector(".timer");
+    let interval;
+
+    let activationNumber = 0;
+    let wallCollisions = 0;
+
+    let game = new Phaser.Game(config);
+
+    let wallDuration = 300;
+    let ballStartSpeed = 300;
+    let ballSpeedIncrease;
+    let wallActivation = true;
+    let ballSpeed = ballStartSpeed;
+
+    let playerLives = 3;
+
+    let topWall;
+    let bottomWall;
+    let rightWall;
+    let leftWall;
+
+    let congratsText = document.getElementById("text");
+    let livesText = document.getElementById("livesText");
+    //On Window load Resize the game, load the welcome message and pause the game.
+    window.onload = function () {
+        resize();
+        window.addEventListener("resize", resize, false);
+        startGame();
+    };
+
+
+    //Preloading all of the assets and other resources used that are used throughout the level
+    function preload() {
+        this.load.image("ball", "assets/moonBall.png");
+        this.load.image('wall', 'assets/horizontalWall.png');
+        this.load.image('wall2', 'assets/verticalWall.png');
+        this.load.audio('wallActivate', 'assets/sound/Blockit/wallActivate.mp3', {
+            instances: 1
+        });
+        this.load.audio('congratulations', 'assets/sound/congratulations.mp3', {
+            instances: 1
+        });
+        this.load.audio('ballBounce', 'assets/sound/Blockit/bounce.mp3', {
+            instances: 1
+        });
+        this.load.audio('backgroundMusic', 'assets/sound/spaceAmbience.mp3', {
+            loop: true
+        });
+
+    }
+    //Create the level using the assets predefined within the preload function
+    function create() {
+        this.sound.play('backgroundMusic', {volume: 0.03, loop: true});
+        this.sound.add('ballBounce');
+        this.sound.add('congratulations');
+        ball = this.physics.add.image(350, 550, 'ball').setScale(0.2);
+        ball.setBounce(1);
+
+        topWall = this.physics.add.image(350, 30, 'wall')
+            .setImmovable(true);
+        bottomWall = this.physics.add.image(350, 630, 'wall')
+            .setImmovable(true);
+
+        leftWall = this.physics.add.staticGroup();
+        rightWall = this.physics.add.staticGroup();
+
+        rightWall.create(648, 330, 'wall2').setImmovable(true).setAlpha(0.5);
+        leftWall.create(52, 330, 'wall2').setImmovable(true).setAlpha(0.5);
+        this.input.on("pointerdown", activateWall, this);
+        this.physics.add.collider(ball, topWall, wallCollision, null, this);
+        this.physics.add.collider(ball, bottomWall, wallCollision, null, this);
+
+        timer.innerHTML = second + " Seconds ";
+    }
+
+    function wallCollision() {
+        this.sound.play('ballBounce', {volume: 0.3});
+        wallCollisions = wallCollisions + 1;
+        wallActivation = true;
+        if (ball.body.touching.right && playerLives === 3) {
+            ballSpeedIncrease = 20;
+            ballSpeed = ballSpeed + ballSpeedIncrease;
+            let ballVelocity = this.physics.velocityFromAngle(Phaser.Math.Between(110, 250), ballSpeed);
+            ball.body.setVelocity(ballVelocity.x, ballVelocity.y);
+        }
+
+        if (ball.body.touching.left && playerLives === 3) {
+            ballSpeedIncrease = 20;
+            ballSpeed = ballSpeed + ballSpeedIncrease;
+            let ballVelocity = this.physics.velocityFromAngle(Phaser.Math.Between(-70, 70), ballSpeed);
+            ball.body.setVelocity(ballVelocity.x, ballVelocity.y);
+        }
+
+        if (ball.body.touching.right && playerLives === 2) {
+            ballSpeedIncrease = 15;
+            ballSpeed = ballSpeed + ballSpeedIncrease;
+            let ballVelocity = this.physics.velocityFromAngle(Phaser.Math.Between(110, 250), ballSpeed);
+            ball.body.setVelocity(ballVelocity.x, ballVelocity.y);
+        }
+
+        if (ball.body.touching.left && playerLives === 2) {
+            ballSpeedIncrease = 15;
+            ballSpeed = ballSpeed + ballSpeedIncrease;
+            let ballVelocity = this.physics.velocityFromAngle(Phaser.Math.Between(-75, 75), ballSpeed);
+            ball.body.setVelocity(ballVelocity.x, ballVelocity.y);
+        }
+
+        if (ball.body.touching.right && playerLives === 1) {
+            ballSpeedIncrease = 5;
+            ballSpeed = ballSpeed + ballSpeedIncrease;
+            let ballVelocity = this.physics.velocityFromAngle(Phaser.Math.Between(100, 260), ballSpeed);
+            ball.body.setVelocity(ballVelocity.x, ballVelocity.y);
+        }
+
+        if (ball.body.touching.left && playerLives === 1) {
+            ballSpeedIncrease = 5;
+            ballSpeed = ballSpeed + ballSpeedIncrease;
+            let ballVelocity = this.physics.velocityFromAngle(Phaser.Math.Between(-80, 80), ballSpeed);
+            ball.body.setVelocity(ballVelocity.x, ballVelocity.y);
+        }
+
+    }
+
+    function activateWall() {
+        wallActivation = true;
+        activationNumber = activationNumber + 1;
+        this.sound.play('wallActivate', {volume: 0.5});
+        if (ball.body.speed === 0) {
+            if (second === 0) {
+                startTimer();
+            }
+            let ballVelocity = this.physics.velocityFromAngle(Phaser.Math.Between(280, 350), ballSpeed);
+            ball.setVelocity(ballVelocity.x, ballVelocity.y);
+            rightWall.world.checkCollision.none = true;
+            leftWall.world.checkCollision.none = true;
+            return;
+        }
+
+        if (wallActivation) {
+            wallActivation = false;
+            this.physics.add.collider(ball, rightWall, wallCollision, null, this);
+            this.physics.add.collider(ball, leftWall, wallCollision, null, this);
+            rightWall.setAlpha(1);
+            leftWall.setAlpha(1);
+            this.time.addEvent({
+                delay: wallDuration,
+                callbackScope: this,
+                callback: function () {
+                    leftWall.setAlpha(0.5);
+                    leftWall.world.colliders.destroy();
+                    rightWall.setAlpha(0.5);
+                    rightWall.world.colliders.destroy();
+                    this.physics.add.collider(ball, topWall, wallCollision, null, this);
+                    this.physics.add.collider(ball, bottomWall, wallCollision, null, this);
+                }
+            });
+        }
+    }
+
+    function stopTimer() {
+        clearInterval(interval);
+        second = 0;
+    }
+    //Update function is a function which is in continuous effect to look for events
+    function update() {
+        livesText.innerHTML = " Available Lives: " + playerLives;
+        gameComplete();
+        if (ball.y > 750 || ball.y < -50 || ball.x > 750 || ball.x < -50) {
+            if (playerLives === 3) {
+                stopTimer();
+                wallDuration = 350;
+                timer.innerHTML = second + " Seconds";
+                ball.setVelocity(0, 0);
+                ball.setPosition(350, 550);
+                playerLives = playerLives - 1;
+                ballSpeed = ballStartSpeed;
+            } else if (playerLives === 2) {
+                wallDuration = 400;
+                stopTimer();
+                timer.innerHTML = second + " Seconds";
+                ball.setVelocity(0, 0);
+                ball.setPosition(350, 550);
+                playerLives = playerLives - 1;
+                ballSpeed = ballStartSpeed;
+            } else {
+                stopTimer();
+                this.cameras.main.shake(800, 0.05);
+                second = 0;
+                this.time.addEvent({
+                    delay: 800,
+                    callbackScope: this,
+                    callback: function () {
+                        this.scene.start("PlayGame");
+                        let failed = document.getElementById("levelFailed");
+                        clearInterval(interval);
+                        failed.classList.add("show");
+                        failed.style.display = "block";
+                    }
+                });
+            }
+        }
+    }
+
+    // Functionality to start the game
+    function startGame() {
+        let welcome = document.getElementById("levelLoad");
+        welcome.classList.add("show");
+        timer.innerHTML = second + " Seconds";
+        welcome.style.display = "block";
+    }
+    //Initiates a timer that increases by 1 second every second and at 60 seconds make the timer display in minutes
+    function startTimer() {
+        clearInterval(interval);
+        interval = setInterval(function () {
+            timer.innerHTML = second + " Seconds ";
+            second++;
+        }, 1000);
+    }
+    //Functionality to check if the objective has been met and make the level complete popup appear with sound effects and pauses the timer.
+    function gameComplete() {
+        if (second === 35) {
+            game.sound.play('congratulations', {volume: 0.01});
+            statistics();
+            let congrats = document.getElementById("levelComplete");
+            clearInterval(interval);
+            congrats.classList.add("show");
+            timer.innerHTML = second + " Seconds";
+            congrats.style.display = "block";
+        }
+    }
+    //Function so that the modal can be closed and the game can be played
+    function closeModal() {
+        let close = document.getElementById("levelLoad");
+        close.classList.add("hide");
+        close.style.display = "none";
+        game.scene.resume("default", true);
+    }
+
+    //Button function so that players can replay the level on success/failure
+    function playAgain() {
+        window.location.replace("Level2.html");
+        clearInterval(interval);
+    }
+
+    //Function to send the player back to main menu of button press
+    function mainMenu() {
+        window.location.replace("index.html");
+    }
+
+    function nextLevel() {
+        window.location.replace("Level3.html");
+        clearInterval(interval);
+    }
+
+    function statistics() {
+        congratsText.innerHTML = "Time Survived: " + second + " Seconds " + "<div>" + "Button presses: " + activationNumber + "<div>" + "Number of Wall Collisions: " + wallCollisions;
+    }
+
+    //Function that looks for the size of the browser window and makes sure that the menu fits to the window.
+    function resize() {
+        var canvas = document.querySelector("canvas");
+        var windowWidth = window.innerWidth;
+        var windowHeight = window.innerHeight;
+        var windowRatio = windowWidth / windowHeight;
+        var gameRatio = game.config.width / game.config.height;
+        if (windowRatio < gameRatio) {
+            canvas.style.width = windowWidth + "px";
+            canvas.style.height = (windowWidth / gameRatio) + "px";
+        } else {
+            canvas.style.width = (windowHeight * gameRatio) + "px";
+            canvas.style.height = windowHeight + "px";
+        }
+    }
+
+
+</script>
+</body>
+</html>
